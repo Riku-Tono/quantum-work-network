@@ -27,8 +27,7 @@ const HERM_TOL: f64 = 1.0e-8;
 const POS_TOL: f64 = 1.0e-8;
 const LEDGER_TOL: f64 = 5.0e-5;
 const TOP_LEVEL_LIMIT: f64 = 0.05;
-const OLD_DIR: &str =
-    r"C:\Users\yauki\Documents\Codex\2026-07-14\codex-codex-a-b-2-a\work\quantum_work_network";
+const OLD_DIR: &str = ".";
 
 const OUTPUTS: [&str; 11] = [
     "fixed_total_noise_timeseries.csv",
