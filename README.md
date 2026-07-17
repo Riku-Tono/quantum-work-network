@@ -3,7 +3,8 @@
 A Rust reference implementation for numerically computing how much of the energy driven through a
 small quantum network arrives at a receiver (the *load*) as **extractable work (ergotropy)**, and how
 that changes under phase noise. The project is developed as a single, incremental research and
-implementation history from Milestone 1 through Milestone 11k.
+implementation history from Milestone 1 through Milestone 11M, followed by finite-chain (N=3..7)
+event-structure diagnostics.
 
 > Intended to be committed as the repository-root `README.md`.
 
@@ -244,13 +245,140 @@ complexity comparisons only.
   **`late_tail_structure_remains`**; auxiliary (internal to the decay fit)
   `two_stage_tail_decay_supported`.
 
-**Designed but not executed (11i).** Milestone 11i is a **design and audit**, not a measurement. It
-confirmed that only aggregate load quantities are stored (no site-resolved populations/currents, full
-density matrices, mutual information, negativity, or mode occupation), and specified a minimal
-follow-up (re-run the single matched N=7 trajectory once, saving site-resolved diagnostics). **This
-site-resolved re-computation has not been run** (`completed_design_with_targeted_recomputation_required`);
-every candidate mechanism (group velocity, boundary reflection, mode beating, entanglement/correlation
-fronts) remains undetermined.
+**Design and audit (11i).** Milestone 11i is a **design and audit**, not a measurement. It confirmed
+that up to that point only aggregate load quantities were stored (no site-resolved populations/currents,
+full density matrices, mutual information, negativity, or mode occupation), and specified a minimal
+follow-up: re-run the single matched N=7 trajectory once, saving site-resolved diagnostics
+(`completed_design_with_targeted_recomputation_required`). 11i itself introduced no new time evolution.
+The minimal site-resolved diagnostic it specified was subsequently executed in Milestone 11M (below);
+11i remains the **design**, 11M is its **single-trajectory execution**. The candidate mechanisms
+themselves (group velocity, boundary reflection, mode beating, entanglement/correlation fronts) remain
+undetermined — 11M records time structure descriptively and does not establish any of them.
+
+**dt-halving convergence of the matched N=7 condition (11L).** For the equal-input matched N=7 condition
+(`Omega = 0.18748395731510084`, fixed, **not** re-matched), the internal time step was halved from
+`dt=0.0025` to `dt=0.00125` (8000 RK4 steps, t=0..10, 1001 saved points; one new full trajectory). The
+11f formal coarse condition was not recomputed and its SHA-256 matched before and after. Two separate
+verdicts are reported and kept distinct:
+
+- **Matching preservation: PASS.** With `Omega` held fixed, fine `E_drive_in = 5.9618450901723317e-2`,
+  relative mismatch `2.8157045010698592e-6`; fine-vs-coarse input change `-2.0217e-13` (relative
+  `3.3911e-12`). No re-matching was performed and **no new matching root is claimed**.
+- **Physical convergence: PASS.** Scalar metrics **23/23 PASS** (e.g. W_max coarse/fine
+  `3.3852501213e-3`/`3.3852501213e-3`, W(t=10) `2.3264679067e-3` both, XGamma `5.3283047839e-2` vs
+  `5.3283047838e-2`); same-time trajectory quantities **10/10 PASS**; W-peak shape PASS (peak time 7.70,
+  half-max width 3.85, both grids). Numerical quality: finite PASS, max trace error `3.775e-15`,
+  Hermiticity error 0, `solver_failure = 0`, with one robust-positivity fallback point
+  (primary 1000 success / 1 failure, fallback 1/1).
+
+Final judgment **`matched_condition_dt_halving_passed_with_fallback_diagnostic`**. This is convergence of
+**this one matched N=7 trajectory** under a single dt-halving; it does not claim convergence at arbitrary
+dt, for other matched conditions, for a fine-dt-specific matching root, or for any other N/Omega/noise.
+
+**Site-resolved transport and load-local change (11M).** Executing the 11i design on a single new
+trajectory (N=7, `TOTAL_GAMMA=1.5`, `Omega = 0.18748395731510084`, `dt=0.0025`, t=0..10 — no fine-dt
+re-run, since 11L already confirmed dt convergence), 11M saves per-site populations
+`n_j = <sigma_j^+ sigma_j^->`, nearest-neighbor bond currents (`I_{j->j+1} = -2 J Im(z_j)`, positive =
+drive->load), a site7->load **energy** current `I_7_to_load = <i[H_interaction, H_load]>`, and the load's
+E / W / passive energy, all on the same 1001 times. Continuity and unit checks PASS (max continuity
+residual `1.373e-5`); the 8 aggregate 11f quantities reproduce (8/8 PASS, max abs difference 0);
+formal-input SHA-256 matched before and after. Observed time structure around the W peak:
+
+| Event | Time |
+|---|---|
+| W peak | t = 7.70 (W_peak `3.3852501213e-3`) |
+| site7->load current, decline onset | t = 7.5 |
+| site7->load current, zero crossing after peak | t ~ 8.15 |
+| site7->load current, persistent negative onset | t = 8.16 |
+| load passive-energy increase onset | t = 7.70 |
+
+From the W peak to t=10: load `Delta E = -1.86345075e-4`, `Delta W = -1.05878221e-3`,
+`Delta passive = +8.72437140e-4`. Final classification
+**`mixed_transport_and_load_local_change_with_fallback_diagnostic`**. Both the transport-side signature
+(current decline / zero crossing / persistent negative direction) and the load-local signature (W
+decrease with concurrent passive increase) are logged with `status = observed` only. **No causal claim is
+made**: the current zero crossing is not called a proof of boundary reflection, the current change is not
+said to cause the W decrease, and the passive-energy increase is not called thermalization or
+decoherence. Not examined: causality, boundary reflection, group velocity, modes, mutual information,
+negativity, entanglement, t>10, N>7, other Omega.
+
+### Finite-chain (N=3..7) event-structure diagnostics
+
+Two follow-up analyses read only stored / formally adopted trajectories and add no new mechanism claims.
+
+**N=3 W-peak branch check.** Testing whether the noise-dependent N=7 W-peak candidate generalizes to
+N=3, only the three stored N=3, `Omega=0.2` trajectories (eta = 0, 1.5, 3.0) were read — no new time
+evolution, smoothing, or fitting. Under fixed extraction rules, the resolved peak sits in different time
+windows across the branches: eta=0 at **t=9.48** (late window), eta=1.5 at **t=5.63** and eta=3.0 at
+**t=5.39** (early window). They cannot be aligned as a single time-window peak branch. Verdict
+**`peak_branch_correspondence_incomplete`** (secondary `none`): neither an early- nor a late-window
+correspondence is supported on the stored grid, and the incompleteness comes from absent local peaks in
+the predefined windows, not from grid resolution. The earlier N=7 preregistered W-peak prediction
+(post-11k experiment 3) is **retained as-is**; it is **not** generalized into an N-common law, and no
+claim is made about eigenmodes, phase transitions, exponential-law validity, or causal noise selection.
+
+**Equal-input N=3..7 event comparison.** N=3, 4, 5, 6, 7 are compared at equal drive input energy, each
+using its own matched `Omega` (N=7 reuses the 11M trajectory; N=8 is **not** included). Per-chain
+categorical signatures:
+
+| N | parity | t_W_peak_end | current negative onset | signature |
+|---:|---|---:|---:|---|
+| 3 | odd | 5.63 | not observed | `negative_not_observed` |
+| 4 | even | 6.04 | 8.69 | `W->passive->negative` |
+| 5 | odd | 6.62 | not observed | `negative_not_observed` |
+| 6 | even | 7.16 | 7.72 | `W->passive->negative` |
+| 7 | odd | 7.70 | 8.16 | `W->passive->negative` |
+
+The formal artifact classification is **`odd_even_alternation_candidate`**, driven by the *continuous*
+side of the precommitment: three quantities (`backflow_amount_post_peak`, `post_peak_W_loss_fraction`,
+`Delta_passive_peak_to_t10`) show non-zero alternating local differences `A_4, A_5, A_6`. However the
+**categorical** odd-even condition is **not** met: N=7 (odd) shares the even-group `W->passive->negative`
+signature rather than the `negative_not_observed` signature of N=3 and N=5, so N=7 breaks the odd-group
+commonality. `t_W_peak_end` also varies smoothly with chain length rather than alternating. The careful
+statement is therefore: a simple odd/even rule was **not** confirmed; only some continuous quantities
+show local alternating differences. This is **not** a parity mechanism, a universal parity order
+parameter, or a statistically significant difference. Numerical quality across N=3..7: 1001 points each,
+state/solver nonfinite 0, max continuity residual `1.373e-5` (< 5e-4), max trace error `2.220e-15`, max
+energy-ledger residual `5.197e-7`; N=7 carries one robust-positivity fallback point (consistent with the
+reused 11M trajectory).
+
+### Post-11k mini-experiments: input dependence on stored trajectories
+
+Building on the stored time series and the tail structure obtained up to Milestone 11k — and
+keeping mechanism hypotheses separate — three small questions were examined on the *existing*
+stored trajectories before any larger computation. They propose no new theory or mechanism. Only
+experiment 3 ran a new trajectory (a single eta=0.75 run); experiments 1 and 2 reuse stored
+trajectories with no new time evolution. All results are observations for this finite model and
+these finite conditions.
+
+- **Event order (Case B).** Across total-noise inputs eta = 0, 1.5, 3.0, the per-metric event
+  order did not agree (the main difference is the position of the usable event). A simple
+  input-independent common event order is not supported. Stop here for this question.
+- **Coherence vs W (Case D, not comparable).** The three trajectories share no common absolute W
+  range (common lower bound `1.3085e-2` exceeds common upper bound `6.9917e-4`), so a raw C(W)
+  comparison at equal W cannot be performed. This is neither support nor non-support of a common
+  C(W) relation; "not comparable" is not a negative result.
+- **W-peak vs total phase noise (Case A).** Using only the existing eta = 0/1.5/3.0 points, an
+  exponential-decay candidate `W_peak(eta) = A exp(-k eta)` and its prediction were fixed in
+  advance (A, k, thresholds, and eta = 0.75 committed in `PRECOMMIT.md`). A single new eta = 0.75
+  trajectory was then run (1001 saved points, numerical checks passed,
+  `completed_with_fallback_diagnostic`): predicted `9.3038620128203936e-3`, observed
+  `9.1509856038800939e-3`, relative error `1.643150%`, verdict
+  `phase_noise_W_peak_exponential_candidate_retained`. The result is agreement with one added point
+  evaluated after precommitment, within the pre-specified threshold; the exponential-decay
+  candidate is provisionally retained. This is not establishment of an exponential law. The 3-point
+  R-squared was not used for the verdict; A, k, and thresholds were not changed after seeing
+  eta = 0.75; no second eta and no alternative model were run.
+
+**What can be said:** for this finite model and these finite conditions, event order is
+input-dependent (Case B); the stored trajectories are not comparable at equal W (Case D); and one
+preregistered added point is consistent, within the pre-specified threshold, with a fixed
+exponential-decay candidate that is provisionally retained (Case A).
+
+**Not claimed:** no universal law, no new quantum channel, no discovered causal mechanism, no
+claim that coherence determines W, no proof of an exponential law, no general scaling law.
+`W_time_area` remains a state-quantity time-area, not cumulative extracted work; usable fraction
+and passive energy are not treated as independent performance quantities.
 
 ---
 
@@ -273,6 +401,23 @@ finite time, and this implementation — not general laws. Full tables live in t
   matched at `Omega=0.18748395731510084` (relative input mismatch `2.8157e-6`); N=7 `W_max 3.3853e-3`
   at t=7.70 vs N=3 `3.0302e-3` at t=5.63 (ratio ~ `1.11717`); N=7 higher/later/narrower peak but
   smaller `W` time-area.
+- **M11L (matched N=7, dt-halving of the same trajectory):** `Omega` fixed at `0.18748395731510084`;
+  `dt` halved `0.0025 -> 0.00125`. Matching preserved (relative mismatch `2.8157045e-6`, input change
+  `~3.39e-12` relative); scalar 23/23 PASS, trajectory 10/10 PASS, W-peak shape PASS (peak t=7.70,
+  W_max `3.3853e-3` both grids); `solver_failure = 0`, one positivity fallback point.
+  `matched_condition_dt_halving_passed_with_fallback_diagnostic`.
+- **M11M (matched N=7, site-resolved single-trajectory diagnostic):** W peak t=7.70; site7->load energy
+  current zero crossing after peak ~ t=8.15, persistent negative onset t=8.16; load passive-increase
+  onset t=7.70. Peak->t10: load `Delta E = -1.86345075e-4`, `Delta W = -1.05878221e-3`,
+  `Delta passive = +8.72437140e-4`. `mixed_transport_and_load_local_change_with_fallback_diagnostic`
+  (transport-side and load-local signatures both `observed`, no causal claim).
+- **N=3 W-peak branch check (stored N=3, Omega=0.2):** resolved peaks at eta=0 t=9.48, eta=1.5 t=5.63,
+  eta=3.0 t=5.39 — not alignable as one time-window branch; `peak_branch_correspondence_incomplete`.
+- **Equal-input N=3..7 event comparison:** signatures N3 `negative_not_observed`, N4
+  `W->passive->negative`, N5 `negative_not_observed`, N6 `W->passive->negative`, N7
+  `W->passive->negative`. Formal `odd_even_alternation_candidate`, but the categorical odd/even condition
+  is **not** met (N=7 breaks the odd-group commonality); only some continuous quantities alternate. Not a
+  parity mechanism, universal rule, or statistically significant difference. N=8 excluded.
 
 ---
 
@@ -287,6 +432,16 @@ finite time, and this implementation — not general laws. Full tables live in t
 - Milestone 10 fixed-total metric rankings under both `TOTAL_GAMMA = 1.5` and `3.0` (M10 Final).
 - Numerical-quality checks (per-run) and, for 11j/11k, SHA-256 input-integrity checks; the 11i checks
   are design/audit checks.
+- dt-halving (`0.0025 -> 0.00125`) of the *same* matched N=7 trajectory with `Omega` fixed: matching
+  preserved and scalar 23/23 / trajectory 10/10 / W-peak shape all PASS, `solver_failure = 0` (M11L).
+- Site-resolved single-trajectory diagnostic for the matched N=7 run: per-site populations, bond
+  currents, site7->load energy current, nearest-neighbor coherences, and load E/W/passive on 1001 times,
+  with the W-peak-relative time ordering above; continuity/unit checks PASS, 11f aggregates reproduced
+  8/8 (M11M).
+- N=3 stored-trajectory W-peak branch windows (eta=0 t=9.48; eta=1.5 t=5.63; eta=3.0 t=5.39) and their
+  non-correspondence as a single time-window branch (`peak_branch_correspondence_incomplete`).
+- Equal-input N=3..7 per-chain categorical signatures and numerical-quality checks; the categorical
+  odd/even condition is not met (N=7 breaks the odd-group commonality).
 
 ## Descriptive model support
 
@@ -310,9 +465,18 @@ These are descriptive shape diagnostics, not evidence of any physical mechanism.
   correspond to specific physical processes.
 - Control cost of extraction, finite-time switch-off/extraction, repeated cycles, continuous supply,
   steady output, long-time stability.
-- `dt`-halving convergence of the matched N=7 condition; matching-root uniqueness/monotonicity.
-- Equal-input results for N=5, for `TOTAL_GAMMA=3.0`, for other `Omega` roots, for N>7, or for t>10;
-  other external solver crates (out of 9c-validation scope).
+- `dt`-halving convergence *beyond the single matched N=7 trajectory checked in 11L* (arbitrary dt, other
+  matched conditions, a fine-dt-specific matching root); matching-root uniqueness/monotonicity.
+- Equal-input results for `TOTAL_GAMMA=3.0`, for other `Omega` roots, for N>7, or for t>10; N=8 is not
+  included in the formal chain-length comparison; other external solver crates (out of 9c-validation
+  scope). (Equal-input N=4/5/6 now exist only as finite-chain event-structure diagnostics, not as a
+  scaling law.)
+- Any parity mechanism, universal odd/even effect, parity order parameter, or statistically significant
+  parity difference; the N=3..7 `odd_even_alternation_candidate` is a descriptive finite-size candidate
+  only, and N=7 breaks the categorical odd-group commonality.
+- Any causal reading of the 11M site-resolved diagnostic: that the current change causes the W decrease,
+  that the current zero crossing / reversal proves boundary reflection, or that the passive-energy
+  increase proves thermalization or decoherence.
 - Fair baselines against classical wave/stochastic models; novelty/priority vs the literature (no
   literature review done).
 
@@ -385,6 +549,8 @@ src/
     fixed_total_noise_comparison.rs # M9c
     n7_t002_eigen_diagnostic.rs     # M9c diagnostic
     n7_fixed_total_validation.rs    # M9c validation (final source of truth)
+    matched_n7_dt_halving_validation.rs    # M11L
+    matched_n7_site_resolved_transport.rs  # M11M
 tests/
   full_24d_short_time.rs            # M2.1 (ignored smoke test)
 MILESTONE_*.md                      # per-stage reports
@@ -417,6 +583,20 @@ Minimal pointers for the load-bearing results (each report lists its own full CS
   `input_matching_interpolated_trial_summary.csv`, `equal_input_timeseries_shape_summary.csv`,
   `equal_input_peak_widths.csv`, `equal_input_curve_transform_models.csv`,
   `equal_input_asymmetric_transform_models.csv`, `equal_input_post_peak_decay_models.csv`.
+- **Matched N=7 dt-halving (11L):** `MILESTONE_11L_MATCHED_N7_DT_HALVING_REPORT.md` (scalar/trajectory
+  comparison CSVs referenced therein).
+- **Matched N=7 site-resolved transport (11M):** `MILESTONE_11M_SITE_RESOLVED_TRANSPORT_REPORT.md`; key
+  CSV `matched_n7_site_resolved_events.csv`.
+- **N=3 W-peak branch check:** `MILESTONE_N3_W_PEAK_BRANCH_REPORT.md`; key CSV
+  `n3_W_peak_branch_comparison.csv`.
+- **Equal-input N=3..7 event comparison:** `MILESTONE_N3_7_EVENT_COMPARISON_REPORT.md` (provided as
+  `FINAL_REPORT.md`); key CSVs `event_summary.csv`, `odd_even_temporal_comparison.csv`,
+  `numerical_checks.csv`.
+- **Post-11k mini-experiments** (paths TODO — confirm folder layout before linking):
+  - Event order: `qwn_event_order_mini_REPORT.md` (CSV `event_orders.csv`).
+  - Coherence vs W: `qwn_coherence_W_response_REPORT.md` (CSV `common_W_range.csv`).
+  - W-peak prediction: `qwn_phase_noise_W_peak_prediction_REPORT.md` and `PRECOMMIT.md`
+    (CSV `prediction_test_result.csv`).
 
 Reading conventions for the CSVs: `W_time_area`/`E_time_area` are time-areas of state quantities (not
 cumulative work or input); `W/Ein` is not an overall efficiency; `usable_fraction` is ergotropy over
