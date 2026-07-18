@@ -10,7 +10,6 @@ and a single end-point ideal local extraction (M15A). After M15A, a supplementar
 the C2 protocol to t=10 and compared it against a long-window C0 baseline on the common saved grid; it
 is not assigned a new Milestone number.
 
-> Intended to be committed as the repository-root `README.md`.
 
 ---
 
@@ -1006,11 +1005,7 @@ Minimal pointers for the load-bearing results (each report lists its own full CS
   `c0_c2_extended_summary.csv`, `c0_c2_extended_comparison_timeseries.csv`,
   `c0_c2_extended_time_area_summary.csv`, `c0_c2_extended_difference_events.csv`,
   `c2_extension_numerical_checks.csv`, `c2_extension_input_manifest.csv`.
-- **Post-11k mini-experiments** (paths TODO — confirm folder layout before linking):
-  - Event order: `qwn_event_order_mini_REPORT.md` (CSV `event_orders.csv`).
-  - Coherence vs W: `qwn_coherence_W_response_REPORT.md` (CSV `common_W_range.csv`).
-  - W-peak prediction: `qwn_phase_noise_W_peak_prediction_REPORT.md` and `PRECOMMIT.md`
-    (CSV `prediction_test_result.csv`).
+
 
 Reading conventions for the CSVs: `W_time_area`/`E_time_area` are time-areas of state quantities (not
 cumulative work or input); `W/Ein` is not an overall efficiency; `usable_fraction` is ergotropy over
