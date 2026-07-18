@@ -6,7 +6,9 @@ that changes under phase noise. The project is developed as a single, incrementa
 implementation history from Milestone 1 through Milestone 15A, via finite-chain (N=3..7)
 event-structure diagnostics, a descriptive decomposition of the load's coherent ergotropy (M12), a
 short-horizon counterfactual branch experiment (M13), coupling-control switching-work accounting (M14),
-and a single end-point ideal local extraction (M15A).
+and a single end-point ideal local extraction (M15A). After M15A, a supplementary comparison extended
+the C2 protocol to t=10 and compared it against a long-window C0 baseline on the common saved grid; it
+is not assigned a new Milestone number.
 
 > Intended to be committed as the repository-root `README.md`.
 
@@ -588,6 +590,50 @@ feedback, measurement, multiple extractions, other N/gamma/Omega, or any propaga
 Nothing here is optimal control, a free increase of work, an efficiency improvement, a confirmed net
 benefit, a zero controller cost, an experimental-hardware advantage, or a quantum advantage.
 
+### C2 extension to t=10: long-window C0 comparison
+
+This supplementary comparison asks whether the C2-minus-C0 bare-load ergotropy difference observed at
+t=8.50 is an artifact of that window's endpoint. It is not a new Milestone. The formally saved M14 Plan
+B full-system state at t=7.70 was propagated **once and continuously** with C2 (`g=0.125`) to t=10.00 —
+no extraction at t=8.50, no switch-back, no rematching, and no split formal trajectory. Fixed
+conditions: N=7, `TOTAL_GAMMA=1.5`, per-site gamma `1.5/7`, `Omega=0.18748395731510084`, restart time
+7.70, final time 10.00, internal `dt=0.0025`, saved interval 0.01, 920 internal steps, 231 saved
+points, drive exactly 0. The C0 long-window baseline is the M12A CSV, fixed by an explicit artifact
+audit. Primary classification **`C2_advantage_positive_at_t10`**.
+
+| t | `W_C0` | `W_C2` | `Delta W` | relative difference |
+|---:|---:|---:|---:|---:|
+| 8.50 | `3.062677468487e-3` | `3.250946031241e-3` | `+1.882685627546e-4` | +6.147189% |
+| 9.68 | `2.417441223901e-3` | `2.999355919229e-3` | `+5.819146953273e-4` | +24.071514% |
+| 10.00 | `2.326467906728e-3` | `2.972492411029e-3` | `+6.460245043013e-4` | +27.768468% |
+
+After t=8.50 the difference increased in **all 150 saved intervals** (decrease count 0, near-flat count
+0), never reached near-zero, and never turned negative; its global minimum is at t=8.50 and its global
+maximum at t=10.00, with no interior local extrema. **This is a statement about the C2-C0 difference,
+not about C2 itself: C2 formed no new W peak after t=8.50**, its in-window maximum W remains at t=7.70
+(`3.3852501212993710e-3`, the same value as C0's maximum), and the difference grows because C0 declines
+faster — t=10 retention is 87.807172% for C2 versus 68.723664% for C0. Over 7.70..10.00 the ergotropy
+time-areas are `A_C0 = 6.5655097929267292e-3`, `A_C2 = 7.2916111984482872e-3`,
+`A_Delta = 7.2610140552155800e-4`, relative difference +11.059330%; these are time-areas of the
+instantaneous bare-load ergotropy and are **not** cumulative extracted work. At t=10 the accompanying
+energy differences are `Delta E_load = +2.106309466093e-5` and `Delta E_passive = -6.249614096404e-4`,
+with energy-identity residual 0. The site7-to-load currents are recorded as observations under the
+existing definition only and are **not** used to explain the ergotropy difference.
+
+Audit: mandatory numerical checks **28/28 PASS**, existing-artifact reproduction checks **15/15 PASS**,
+SHA audit PASS. The C0 short/long observable residual is 0, the C2 t=7.70..8.50 reproduction residual is
+0, and the M15A t=8.50 values reproduce to a maximum residual of `9.107e-18`. Eigensolver fallback count
+0; formal runtime 682.479 s.
+
+Scope: this is a finite-condition, saved-grid comparison from one propagation of one stored state
+against one fixed baseline. **No extraction was performed in this extension** — the only formal
+extraction in the project remains the single ideal local extraction at t=8.50 in M15A. It does not
+establish general weak-coupling or C2 superiority, an optimal coupling, switch time, or extraction time,
+any causal mechanism, any conversion of passive energy into ergotropy, any net benefit combining
+switching and extraction work, repeated or cyclic operation, steady-state output, behavior beyond t=10,
+other N/gamma/Omega/g, efficiency improvement, or quantum advantage. Where the word *advantage* is used
+here, it means only the sign of the bare-load ergotropy difference under these fixed finite conditions.
+
 ---
 
 ## Current main results
@@ -668,6 +714,15 @@ finite time, and this implementation — not general laws. Full tables live in t
   `-6.8592992121339208e-5`; gross-work-vs-`W_coh` residual `9.1072982488782372e-18`; post-extraction
   load ergotropy 0 for both. Checks 40/40 PASS. Verdict
   `state_improvement_preserved_after_extraction`. The ledgers are not summed into a net benefit.
+- **C2 extension to t=10 (supplementary, no new Milestone number, no extraction):** propagating the
+  saved t=7.70 state once with C2 to t=10.00 and comparing against the fixed M12A C0 long-window
+  baseline, the C2-C0 bare-load ergotropy difference is `+1.882685627546e-4` (+6.147189%) at t=8.50,
+  `+5.819146953273e-4` (+24.071514%) at t=9.68, and `+6.460245043013e-4` (+27.768468%) at t=10.00,
+  increasing in all 150 saved intervals after t=8.50 with no near-zero or negative crossing. C2 formed
+  **no new W peak** after t=8.50 — the difference grew because C0 declined faster (t=10 retention
+  87.807172% vs 68.723664%). Ergotropy time-area over 7.70..10.00: `A_Delta = 7.2610140552155800e-4`
+  (+11.059330%), a time-area of instantaneous ergotropy, not cumulative extracted work. Classification
+  `C2_advantage_positive_at_t10`; 28/28 and 15/15 checks PASS.
 
 ---
 
@@ -717,6 +772,11 @@ finite time, and this implementation — not general laws. Full tables live in t
   `1.8826856275460432e-4`, agreeing with the pre-extraction `W_coh` difference to a residual of
   `9.1072982488782372e-18`, with the total-Hamiltonian accounting giving the same sign and
   post-extraction load ergotropy exactly 0 in both protocols; checks 40/40 PASS (M15A).
+- That, extending C2 from the formally saved t=7.70 state to t=10 and comparing it with the fixed C0
+  baseline on the common saved grid, the C2-C0 bare-load ergotropy difference is still positive at t=10
+  and increased across every saved interval after t=8.50, under these fixed finite conditions. This
+  concerns the difference between the two protocols, not growth of C2's own ergotropy, which formed no
+  new peak after t=8.50; checks 28/28 and 15/15 PASS (C2 extension, no extraction performed).
 
 ## Descriptive model support
 
@@ -776,19 +836,22 @@ withdraw the B3 result above.
   passive energy converted into coherent ergotropy, that correlation suppression protected work, or that
   the mutual-information decrease caused (or was converted into) the `W_coh` decrease.
 - Generalization of any M12/M13 result beyond this single fixed matched N=7 condition, these two branch
-  start times, the finite window (branch t<=8.50, trajectory t<=10), and this saved resolution; no
-  extraction, recovery, control, or repeated-cycle operation was performed.
+  start times, the finite window (branch t<=8.50, trajectory t<=10), and this saved resolution; within
+  M12/M13 themselves no extraction, recovery, control, or repeated-cycle operation was performed (the
+  later C2 extension to t=10 is a separate supplementary check and likewise performed no extraction).
 - Anything beyond the ideal, instantaneous idealizations used in M14/M15A. Specifically not confirmed:
   a **finite-time switch or ramp** (the modeled quench has mathematically zero duration, no controller
   Hamiltonian and no bandwidth limit); the **implementation cost of any actuator or controller** (a
   numerically zero Hamiltonian-jump work is not a zero device cost); the **implementation cost of the
   extraction unitary**; any **net benefit combining switching work and extraction work** (the ledgers
   are deliberately kept separate and are never summed); **repeated extraction or cycle operation**;
-  **long-time recovery or re-entry** (the formal window ends at t=8.50 and does not test the t=9.68
-  positive current return); **parameter generalization** to other coupling values, sweeps, N, gamma,
-  Omega, branch times, or t>8.50; **optimal control** of any kind (no optimum was searched for or
-  found, and weaker coupling is not shown to be generally better); any **experimental advantage** on
-  real hardware; and any **quantum advantage**.
+  **general long-time stability, steady state, or behavior beyond t=10** — note that the formal windows
+  and the single extraction time of M13A and M15A themselves remain t=8.50, while a separate
+  supplementary check has propagated C2 to t=10, so saved-grid comparisons at t=9.68 and t=10 have been
+  carried out (without extraction); **parameter generalization** to other coupling values, sweeps, N,
+  gamma, Omega, branch times, or conditions beyond those fixed here; **optimal control** of any kind (no
+  optimum was searched for or found, and weaker coupling is not shown to be generally better); any
+  **experimental advantage** on real hardware; and any **quantum advantage**.
 - Fair baselines against classical wave/stochastic models; novelty/priority vs the literature (no
   literature review done).
 
@@ -833,6 +896,10 @@ Later stages report their own runtimes and audits: the M14A design checks needed
 22/22 checks PASS and 15/15 hashes unchanged; M15A reports 40/40 numerical and provenance checks PASS.
 The two saved 384x384 states from Plan B are stored as row-major little-endian complex-f64 binaries
 with `QWNRHO1` metadata (2,359,320 bytes each), individually hashed in `m14_plan_b_state_files.csv`.
+The supplementary C2 extension to t=10 reports a formal runtime of 682.479 s (11.37 min) with 28/28
+mandatory numerical checks PASS, 15/15 existing-artifact reproduction checks PASS, SHA audit PASS, and
+eigensolver fallback count 0; it saves two unextracted C2 states (`c2_pre_extraction_state_t850.bin`,
+`c2_pre_extraction_state_t1000.bin`) in the same `QWNRHO1` format, each with a recorded SHA-256.
 
 ---
 
@@ -934,6 +1001,11 @@ Minimal pointers for the load-bearing results (each report lists its own full CS
 - **End-point extraction accounting (15A):** `MILESTONE_15A_ENDPOINT_EXTRACTION_ACCOUNTING.md`; key
   CSVs `endpoint_extraction_comparison.csv`, `gross_work.csv`, `energy_ledgers.csv`,
   `numerical_checks.csv`.
+- **C2 extension to t=10 (supplementary, no new Milestone number):**
+  `MILESTONE_C2_EXTENSION_TO_T10_COMPARISON.md` and `C2_EXTENSION_INPUT_AUDIT.md`; key CSVs
+  `c0_c2_extended_summary.csv`, `c0_c2_extended_comparison_timeseries.csv`,
+  `c0_c2_extended_time_area_summary.csv`, `c0_c2_extended_difference_events.csv`,
+  `c2_extension_numerical_checks.csv`, `c2_extension_input_manifest.csv`.
 - **Post-11k mini-experiments** (paths TODO — confirm folder layout before linking):
   - Event order: `qwn_event_order_mini_REPORT.md` (CSV `event_orders.csv`).
   - Coherence vs W: `qwn_coherence_W_response_REPORT.md` (CSV `common_W_range.csv`).
