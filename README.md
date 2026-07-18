@@ -3,8 +3,10 @@
 A Rust reference implementation for numerically computing how much of the energy driven through a
 small quantum network arrives at a receiver (the *load*) as **extractable work (ergotropy)**, and how
 that changes under phase noise. The project is developed as a single, incremental research and
-implementation history from Milestone 1 through Milestone 11M, followed by finite-chain (N=3..7)
-event-structure diagnostics.
+implementation history from Milestone 1 through Milestone 15A, via finite-chain (N=3..7)
+event-structure diagnostics, a descriptive decomposition of the load's coherent ergotropy (M12), a
+short-horizon counterfactual branch experiment (M13), coupling-control switching-work accounting (M14),
+and a single end-point ideal local extraction (M15A).
 
 > Intended to be committed as the repository-root `README.md`.
 
@@ -380,6 +382,212 @@ claim that coherence determines W, no proof of an exponential law, no general sc
 `W_time_area` remains a state-quantity time-area, not cumulative extracted work; usable fraction
 and passive energy are not treated as independent performance quantities.
 
+### Milestone 12: what the post-peak W decrease looks like (fixed matched N=7)
+
+Milestone 12 keeps the M11M matched N=7 condition fixed (`TOTAL_GAMMA=1.5`, `Omega =
+0.18748395731510084`, `dt=0.0025`, t=0..10, 1001 saved points, vacuum initial state) and asks three
+*descriptive* questions about the post-peak decrease of the load's extractable work: which component
+changes (12A), in what temporal order (12B), and how load-chain correlation behaves around it (12C).
+No matching, re-optimization, root search, fine-dt run, or other N/gamma/Omega was performed.
+
+**12A — local ergotropy decomposition.** One new trajectory under the same fixed condition. Using the
+existing energy-basis convention (`H_L = diag(0,1,2)`), the load ergotropy is split as
+`W = W_pop + W_coh`, with `W_pop = W(Delta_H(rho_L))` the diagonal (population) part. At **every** saved
+time `W_pop = 0` and therefore `W = W_coh`; over `t = 7.70 -> 10.00`,
+`Delta W = Delta W_coh = -1.0587822145716654e-3`, `Delta W_pop = 0`,
+`Delta E_load = -1.8634507496082930e-4`, `Delta E_passive = 8.7243713961083613e-4`. The observed signed
+W decrease is thus *described* entirely as a `W_coh` decrease. The pre-registered ratio rule, however,
+required **both** components to decrease positively, and `L_pop = 0` made the ratio undefined, so the
+formal classification is **`component_change_inconclusive`**. That verdict reflects the pre-committed
+rule being inapplicable — it does **not** mean the decomposition failed; the decomposition itself is
+exact (`max |W - (W_pop + W_coh)| = 0`). Numerical quality **20/20 PASS**, M11M aggregates reproduced
+**8/8 PASS** (max abs difference 0), formal input SHA-256 7/7 unchanged. Population and coherent parts
+are not independent conserved quantities or separate physical energies.
+
+**12B — temporal relation (no new time evolution).** Reading only the 12A saved 1001-point series under
+a pre-registered five-interval persistence rule (`M12B_PRECOMMIT.md`; no smoothing, fitting, FFT, or
+extremum interpolation), the saved-grid order is:
+
+| Event | Time |
+|---|---|
+| site7->load current decline onset | t = 7.50 |
+| `W_coh` peak / persistent decline | t = 7.70 / 7.70 |
+| `Cl1` (coherence l1-norm) peak / persistent decline | t = 7.73 / 7.73 |
+| current zero crossing | t = 8.15 |
+| current persistent negative onset | t = 8.16 |
+| current persistent positive return | t = 9.68 |
+
+Formal classification **`coherence_and_ergotropy_decline_before_negative_current`** (3/5/7-interval
+sensitivity all agree). The persistent negative current begins **0.46 later** than the `W_coh` decline
+onset, so the simple account "the turn to negative current initiated the `W_coh` decrease" is **not
+supported by the time ordering**. This is a statement about ordering only; **no causal relation between
+current and `W_coh` is established** in either direction. Checks 15/15 PASS, `W = W_coh` max difference
+0, input SHA-256 3/3 unchanged. The current integrals are time-integrals of a state-derived quantity,
+not work, efficiency, loss, dissipation, or heat.
+
+**12C — load-chain correlation.** One new full trajectory under the same fixed condition, evaluating
+load-chain mutual information `I(C:L) = S_chain + S_load - S_total` (natural log, nats), the individual
+entropies, and purities at all 1001 saved times. The MI global peak and its five-interval persistent
+decline both fall at **t = 7.51**, with peak value **`4.5985207125390781e-3` nats** — **0.19 earlier**
+than the `W_coh` peak/decline at t=7.70. Formal classification
+**`mutual_information_peaks_before_Wcoh_decline`**, unchanged across the 3/5/7-interval sensitivity
+grid. Numerical quality **29/29 PASS**; existing formal artifacts SHA-256 **30/30 unchanged**; M12A
+common quantities reproduced to max abs difference 0. Mutual information is a **total-correlation**
+observable including classical and quantum correlation — it is **not** work, ergotropy, or
+entanglement. No claim is made that the MI decrease caused the `W_coh` decrease, or that `W` was
+converted into MI.
+
+### Milestone 13: short-horizon counterfactual branches and their temporal resolution limit
+
+**13A — formal counterfactual branch experiment.** Starting from the *same* stored total-system state
+as M12C and changing only the **generator after the branch time**, short branches were propagated on a
+0.01 saved grid to t=8.50 from two branch starts (t=7.50 and t=7.70; 728 formal saved rows total):
+
+- **B0** baseline continuation (reproduces M12C exactly, max abs difference 0);
+- **B1** chain dephasing set to 0 after the branch;
+- **B3** chain-load coupling halved after the branch (`g: 0.25 -> 0.125`);
+- **B4** coupling set to 0, a boundary control (max invariant drift `1.9984014443252818e-15`).
+
+**B3 gives the same formal classification at both branch starts:
+`weaker_coupling_weakens_Wcoh_decline`.**
+
+| Branch start | endpoint `W_coh` relative difference | `W_coh` time-area relative difference |
+|---|---:|---:|
+| 7.50 | +6.1424321151409798 % | +1.4670925175957812 % |
+| 7.70 | +6.1471886834895455 % | +2.1027954259932112 % |
+
+B1 differs between starts and was **not** averaged: `dephasing_counterfactual_mixed` at 7.50,
+`future_dephasing_change_has_small_effect` at 7.70. B4 is
+`zero_coupling_boundary_control_pass` at both starts. All numerical-quality rows PASS (max trace error
+`1.776e-15`, Hermiticity error 0, no fallback used, drive after branch 0).
+
+The admissible summary is exactly: **from the same state, halving the chain-load coupling after the
+branch produced a consistently weaker `W_coh` decrease within the finite window, at both branch starts,
+relative to the baseline that keeps the normal coupling.** Explicitly **not** claimed: that coupling is
+the sole cause of the `W_coh` decrease; that weaker coupling is always better; that an optimal coupling
+was found; that halving the coupling was shown to protect `W_coh` by some mechanism. The B1 and B3
+percentages are **not** compared head-to-head to rank which knob "matters more". `W_coh` time-area is a
+time-integral of a state quantity, not cumulative extracted work.
+
+**13B — temporal response decomposition (no new computation).** Using only the formal 13A saved CSVs
+(new trajectories 0, new branches 0, new parameter conditions 0), 13B asks which saved observable first
+develops a persistent B3-minus-B0 difference. Under the frozen five-interval rule:
+
+- **start 7.50:** current at t=7.50, then all five other quantities (`Cl1`, MI, `W_coh`, load energy,
+  passive energy) together at t=7.51;
+- **start 7.70:** current at t=7.70, then MI / load energy / passive energy / `W_coh` at t=7.71, then
+  `Cl1` at t=7.75.
+
+However the three-interval rule places the main state quantities simultaneous with `W_coh`, while the
+five- and seven-interval rules produce a start-time dependence; across the full 3/5/7 x epsilon
+(x0.5/x1/x2) grid the classification is not stable (`Wcoh_and_other_differences_emerge_together` vs
+`branch_response_order_depends_on_start_time`). The formal classification is therefore
+**`temporal_response_inconclusive`**. **This is a resolution limit, not a computational failure, and it
+is not a negation of the 13A B3 result**: the numerical audit is **35/35 PASS** with **11/11 SHA-256
+unchanged** for the formal M13A inputs, and the M13A B3 classifications and relative differences
+reproduce within 1e-12. The immediate current difference at the branch time is **structural** — the
+current expression itself contains the coupling coefficient that was changed (audited as
+`current_B3 = 0.5 * current_B0` at branch start) — and it is **not** read as the current causing the
+later `W_coh` difference. Also not shown: that passive energy converted into coherent ergotropy, or
+that correlation suppression protected work.
+
+**Where this leaves the project.** M12 described the *component* (`W = W_coh`, 12A), the *temporal
+order* (12B), and the *load-chain correlation* (12C) of the post-peak `W_coh` decrease. M13A examined
+the finite-time response to a generator change from an identical state and found, at both branch
+starts, that halving the coupling weakens the `W_coh` decrease. M13B could not uniquely resolve the
+internal response ordering of that branch at the available saved resolution. **Coupling sensitivity is
+therefore a confirmed observation, while the specific physical mechanism and any optimal condition
+remain undetermined.**
+
+### Milestone 14: coupling-control design and switching-work accounting
+
+Milestone 14 asks what it costs, *within the model's Hamiltonian ledger*, to make the M13A coupling
+change — and keeps that ledger strictly separate from the state ledger. Fixed protocol names used from
+here on:
+
+| Protocol | Definition | Corresponds to |
+|---|---|---|
+| **C0** | `g = 0.25` throughout | M13A B0 |
+| **C1** | `g: 0.25 -> 0.125` at t=7.50, held to 8.50 | M13A B3, start 7.50 |
+| **C2** | `g: 0.25 -> 0.125` at t=7.70, held to 8.50 | M13A B3, start 7.70 |
+
+No `g=0`, additional coupling value, switch-back, ramp, feedback, or multiple switch is admitted.
+
+**14A — design only (no formal control trajectory).** Milestone 14A is a **design and audit
+Milestone**: it ran **no formal control trajectory, no coupling sweep, no optimization, and no ramp**.
+It audited the implemented interaction term (`H_CL(g) = g V_CL`, `V_CL = sigma_plus_N b +
+sigma_minus_N b_dagger`, exactly linear in `g`), confirmed the drive envelope is exactly zero for
+t>tau=3.2 so that post-switch protocol differences are **not** drive-input differences, fixed the
+ideal-quench convention `W_switch_on_system = Tr[rho(t_s)(H_after - H_before)]` (positive = supplied by
+the external controller to the modeled system; state unchanged across the quench), and fixed **three
+separate ledgers** — state quantities, switching work, and post-switch energy — which are **not**
+summed or subtracted into any net quantity. Its no-propagation unit checks are **11/11 PASS**. The
+reuse audit found that the M13A artifacts do not persist full density matrices or `Tr[rho V_CL]`, so
+the verdict was `single_prefix_recomputation_required`: re-run one baseline prefix only. Final design
+verdict **`coupling_control_experiment_ready`**, recommended plan **Plan B
+(`minimal_state_recomputation_for_switching_accounting`)**. The state-level trade-off preview quoted
+there is explicitly *not* a formal control verdict, because the switching work was still missing.
+
+**14 Plan B — formal switching-work accounting (executed).** Exactly one baseline prefix was propagated
+from t=0 to t=7.70, full density matrices were saved at t=7.50 and t=7.70, and the ideal same-state
+switch was evaluated at both. New post-switch branches, coupling values, sweeps, ramps, extraction,
+optimization, fine-dt runs, and t>8.50 propagation: **0**. The existing M13A C0/C1/C2 post-switch state
+trajectories were reused unchanged.
+
+| Protocol | switch time | `W_switch_on_system` | `W_switch_out` |
+|---|---:|---:|---:|
+| C1 | 7.50 | `1.6980822985791084e-15` | `-1.6980822985791084e-15` |
+| C2 | 7.70 | `8.8624029002963674e-16` | `-8.8624029002963674e-16` |
+
+Both ideal-quench energy jumps fall below the fixed `1e-12` audit tolerance, so the correct description
+is **numerically zero at this tolerance** (status `numerically_zero_within_1e-12_audit_tolerance`).
+**A numerically zero Hamiltonian-jump work does not mean a real controller is free**: the model has no
+actuator Hamiltonian, finite ramp, bandwidth, or device-cost ledger. Reusing the M13A state values, the
+formal composite classification for **both** C1 and C2 is
+**`Wcoh_improves_with_load_energy_tradeoff + switching_accounting_available`** — endpoint `W_coh` and
+`W_coh` area each improve by at least 1%, while endpoint load-energy retention stays below the fixed
+99% threshold (C1: `W_coh` endpoint +6.142%, area +1.467%, retention 97.159%; **C2: `W_coh` endpoint
++6.147%, area +2.103%, retention 98.961%**). Numerical checks **22/22 PASS**; M13A B0 quantities
+reproduce at both switch times to max abs difference `3.839e-13`; source/formal input hashes 15/15
+unchanged. The reported switching-work ratios are scale diagnostics, **not efficiencies**, and the
+switching ledger is not converted into a profit, a "net protected `W_coh`", or a control-efficiency
+claim.
+
+### Milestone 15A: end-point extraction accounting after coupling control
+
+Milestone 15A propagates only C0 and C2 from 7.70 to 8.50 and performs **one** ideal local extraction
+at the single fixed evaluation time **t = 8.50**. The formal comparison is **C2 - C0 only**. Verdict
+**`state_improvement_preserved_after_extraction`**, mandatory numerical failures **0**.
+
+| Quantity at t=8.50 | C0 | C2 | C2 - C0 |
+|---|---:|---:|---:|
+| `W_coh` before extraction | `3.0626774684866464e-3` | `3.2509460312412416e-3` | `1.8826856275459521e-4` |
+| load energy before extraction | `6.601877630500e-3` | `6.533284638378e-3` | `-6.8592992121339208e-5` |
+| `W_load_gross` | `3.0626774684866503e-3` | `3.2509460312412546e-3` | `1.8826856275460432e-4` |
+| `W_operation_out_total` | `3.062677468536e-3` | `3.250946031265e-3` | `1.8826856272917414e-4` |
+| interaction jump | `-4.957529045397e-14` | `-2.416320556056e-14` | `2.5412084893412970e-14` |
+| load ergotropy after extraction | `0` | `0` | `0` |
+
+The gross-work difference reproduces the pre-extraction `W_coh` difference with residual
+`9.1072982488782372e-18` (ratio `1.000000000000`). Because the interaction-jump difference is only
+`2.5412084893412970e-14`, the bare-load and total-Hamiltonian accountings give the **same sign** for the
+comparison. Numerical and provenance checks **40/40 PASS**, including trace, Hermiticity, positivity,
+post-extraction zero ergotropy, M13A endpoint reuse, M14 state SHA-256, and switching-accounting reuse.
+
+The admissible conclusion is exactly: **at t=8.50, a single ideal local extraction on C2 yielded a
+larger gross extracted work than the baseline C0; the C2-C0 gross-work difference agreed with the
+pre-extraction `W_coh` difference to numerical precision; and including the interaction term in a
+total-Hamiltonian accounting did not change the sign of the comparison.** In short, the state-level
+improvement was **preserved** through this one ideal local extraction.
+
+**Ledgers stay separate.** `W_coh`, load energy, switching work, `W_load_gross`, and
+`W_operation_out_total` are **not** summed into any single "benefit". The M14 Plan B C2 switching work
+(`8.8624029002963674e-16`) is carried over for reference only and is **not** combined with either
+extraction-work column. Not performed in 15A: new coupling conditions, sweeps, ramps, optimization,
+feedback, measurement, multiple extractions, other N/gamma/Omega, or any propagation beyond t=8.50.
+Nothing here is optimal control, a free increase of work, an efficiency improvement, a confirmed net
+benefit, a zero controller cost, an experimental-hardware advantage, or a quantum advantage.
+
 ---
 
 ## Current main results
@@ -418,6 +626,48 @@ finite time, and this implementation — not general laws. Full tables live in t
   `W->passive->negative`. Formal `odd_even_alternation_candidate`, but the categorical odd/even condition
   is **not** met (N=7 breaks the odd-group commonality); only some continuous quantities alternate. Not a
   parity mechanism, universal rule, or statistically significant difference. N=8 excluded.
+- **M12A (matched N=7, load ergotropy decomposition):** `W_pop = 0` at every saved time, so `W = W_coh`;
+  over t=7.70->10.00 `Delta W = Delta W_coh = -1.0587822146e-3`, `Delta W_pop = 0`,
+  `Delta E_load = -1.8634507496e-4`, `Delta E_passive = 8.7243713961e-4`. Formal
+  `component_change_inconclusive` (the pre-committed both-components ratio rule was inapplicable, not a
+  failed decomposition); 20/20 PASS, M11M aggregates 8/8 PASS.
+- **M12B (same series, no new evolution):** current decline onset t=7.50; `W_coh` peak/decline t=7.70;
+  `Cl1` peak/decline t=7.73; current zero crossing t=8.15; persistent negative onset t=8.16; persistent
+  positive return t=9.68. `coherence_and_ergotropy_decline_before_negative_current`; the persistent
+  negative current is 0.46 *later* than the `W_coh` decline onset.
+- **M12C (same condition, one new trajectory):** load-chain mutual information peaks and begins its
+  persistent decline at t=7.51, peak `4.5985207125e-3` nats — 0.19 earlier than the `W_coh` peak.
+  `mutual_information_peaks_before_Wcoh_decline`; 29/29 PASS, 30/30 SHA-256 unchanged. MI is a
+  total-correlation observable, not work or ergotropy.
+- **M13A (short-horizon counterfactual branches from the M12C state):** halving the chain-load coupling
+  after the branch (B3) gives `weaker_coupling_weakens_Wcoh_decline` at **both** starts — endpoint
+  `W_coh` relative difference `+6.1424321151%` (start 7.50) and `+6.1471886835%` (start 7.70);
+  `W_coh` time-area relative difference `+1.4670925176%` and `+2.1027954260%`. B1 start-dependent
+  (`dephasing_counterfactual_mixed` / `future_dephasing_change_has_small_effect`); B4
+  `zero_coupling_boundary_control_pass`, max invariant drift `1.998e-15`.
+- **M13B (13A CSVs only, no new computation):** the B3-B0 persistent-difference ordering is not stable
+  across the 3/5/7 x epsilon sensitivity grid — `temporal_response_inconclusive`; audit 35/35 PASS,
+  11/11 SHA-256 unchanged, M13A values reproduced within 1e-12. A resolution limit, not a failure, and
+  not a negation of the M13A B3 result.
+- **M14A (design only):** no formal control trajectory, sweep, ramp, or optimization was run. Fixed the
+  protocol set C0/C1/C2, the ideal-quench convention
+  `W_switch_on_system = Tr[rho(t_s)(H_after-H_before)]`, and three separate ledgers; unit checks 11/11
+  PASS. Verdict `coupling_control_experiment_ready`, recommended Plan B.
+- **M14 Plan B (executed):** one baseline prefix to t=7.70; ideal same-state switch evaluated at both
+  switch times. `W_switch_on_system` = `1.6980822985791084e-15` (C1) and `8.8624029002963674e-16` (C2)
+  — **numerically zero within the 1e-12 audit tolerance**, which does **not** imply a real controller is
+  free. Both protocols: `Wcoh_improves_with_load_energy_tradeoff + switching_accounting_available`
+  (C2 endpoint `W_coh` relative difference +6.147%, endpoint load-energy retention 98.961%). Checks
+  22/22 PASS; hashes 15/15 unchanged.
+- **M15A (executed, C2-C0 at t=8.50 only):** one ideal local extraction.
+  `W_coh` before `3.0626774684866464e-3` (C0) vs `3.2509460312412416e-3` (C2);
+  `Delta W_coh = 1.8826856275459521e-4`; `W_load_gross` `3.0626774684866503e-3` vs
+  `3.2509460312412546e-3`, `Delta = 1.8826856275460432e-4`;
+  `Delta W_operation_out_total = 1.8826856272917414e-4`;
+  `Delta` interaction jump `2.5412084893412970e-14`; `Delta` load energy before
+  `-6.8592992121339208e-5`; gross-work-vs-`W_coh` residual `9.1072982488782372e-18`; post-extraction
+  load ergotropy 0 for both. Checks 40/40 PASS. Verdict
+  `state_improvement_preserved_after_extraction`. The ledgers are not summed into a net benefit.
 
 ---
 
@@ -442,6 +692,31 @@ finite time, and this implementation — not general laws. Full tables live in t
   non-correspondence as a single time-window branch (`peak_branch_correspondence_incomplete`).
 - Equal-input N=3..7 per-chain categorical signatures and numerical-quality checks; the categorical
   odd/even condition is not met (N=7 breaks the odd-group commonality).
+- For the matched N=7 condition, that the load's diagonal (population) ergotropy is exactly 0 at every
+  saved time, so `W = W_coh`, with an exact decomposition residual of 0 and the signed peak->t10 changes
+  above (M12A).
+- The saved-grid event ordering `current decline (7.50) -> W_coh decline (7.70) -> Cl1 decline (7.73) ->
+  current zero crossing (8.15) -> persistent negative current (8.16) -> persistent positive return
+  (9.68)`, stable across 3/5/7-interval rules (M12B).
+- The load-chain mutual information peak/persistent-decline time t=7.51 and peak value
+  `4.5985207125e-3` nats, 0.19 earlier than the `W_coh` peak, stable across 3/5/7-interval rules (M12C).
+- That, from an identical stored state, halving the chain-load coupling after the branch weakens the
+  `W_coh` decrease within the finite window at **both** branch starts, with the endpoint and time-area
+  relative differences above; plus the B0 reproduction (max abs difference 0) and the B4 zero-coupling
+  boundary control (max invariant drift `1.998e-15`) (M13A).
+- The numerical/SHA-256 audits of the re-analysis stage: 35/35 checks PASS, 11/11 formal M13A inputs
+  unchanged, M13A B3 values reproduced within 1e-12 (M13B).
+- That the implemented interaction term is exactly linear in `g` and that the drive is exactly zero at
+  t=7.50, 7.70, and 8.50, so post-switch protocol differences are not drive-input differences; unit
+  checks 11/11 PASS with zero residuals (M14A, no time evolution).
+- The ideal-quench Hamiltonian-jump work for both coupling-down protocols,
+  `1.6980822985791084e-15` (C1) and `8.8624029002963674e-16` (C2), each below the 1e-12 audit
+  tolerance, with the state exactly unchanged across the evaluated switch and M13A B0 quantities
+  reproduced to `3.839e-13`; checks 22/22 PASS (M14 Plan B).
+- That at t=8.50 a single ideal local extraction gives `W_load_gross` larger for C2 than for C0 by
+  `1.8826856275460432e-4`, agreeing with the pre-extraction `W_coh` difference to a residual of
+  `9.1072982488782372e-18`, with the total-Hamiltonian accounting giving the same sign and
+  post-extraction load ergotropy exactly 0 in both protocols; checks 40/40 PASS (M15A).
 
 ## Descriptive model support
 
@@ -452,6 +727,18 @@ finite time, and this implementation — not general laws. Full tables live in t
   late-tail concentration ~ `59.6%` in t=9->10, `late_tail_structure_remains` (M11k).
 
 These are descriptive shape diagnostics, not evidence of any physical mechanism.
+
+**Counterfactual branch response (M13A).** Not a curve fit but the same category of evidence: a
+descriptive, finite-window comparison between branches that share an identical state and differ only in
+the generator applied after the branch time. The B3 (coupling halved) branch shows a weaker `W_coh`
+decrease than the B0 baseline at both starts (endpoint `W_coh` relative difference `+6.142%` / `+6.147%`;
+time-area relative difference `+1.467%` / `+2.103%`), with the B4 zero-coupling boundary control passing.
+This establishes a **sensitivity of the observed `W_coh` decline to the chain-load coupling within this
+window** — it is not a mechanism, not a protection scheme, not an optimum, and the B1 (dephasing) and B3
+(coupling) percentages are not ranked against each other. M13B, which re-analyzed only these saved
+values, could not uniquely order the internal response
+(`temporal_response_inconclusive`); that is a limit of the saved temporal resolution and does not
+withdraw the B3 result above.
 
 ---
 
@@ -477,6 +764,31 @@ These are descriptive shape diagnostics, not evidence of any physical mechanism.
 - Any causal reading of the 11M site-resolved diagnostic: that the current change causes the W decrease,
   that the current zero crossing / reversal proves boundary reflection, or that the passive-energy
   increase proves thermalization or decoherence.
+- The internal temporal ordering of the weaker-coupling branch response: under the 3/5/7-interval x
+  epsilon sensitivity grid the B3-B0 persistent-difference order was **not stable**, so the order in
+  which current, load energy, passive energy, `Cl1`, MI, and `W_coh` respond could not be uniquely
+  determined at the current saved interval and persistence rules (M13B,
+  `temporal_response_inconclusive`). The immediate current difference at the branch time is structural
+  (the current contains the changed coupling coefficient) and is not evidence of a response order.
+- The physical mechanism behind any of the M12/M13 observations. Coupling sensitivity is observed
+  (M13A), but no mechanism is identified: it is not shown that coupling is the sole cause of the `W_coh`
+  decrease, that weaker coupling is generally better, that an optimal coupling exists or was found, that
+  passive energy converted into coherent ergotropy, that correlation suppression protected work, or that
+  the mutual-information decrease caused (or was converted into) the `W_coh` decrease.
+- Generalization of any M12/M13 result beyond this single fixed matched N=7 condition, these two branch
+  start times, the finite window (branch t<=8.50, trajectory t<=10), and this saved resolution; no
+  extraction, recovery, control, or repeated-cycle operation was performed.
+- Anything beyond the ideal, instantaneous idealizations used in M14/M15A. Specifically not confirmed:
+  a **finite-time switch or ramp** (the modeled quench has mathematically zero duration, no controller
+  Hamiltonian and no bandwidth limit); the **implementation cost of any actuator or controller** (a
+  numerically zero Hamiltonian-jump work is not a zero device cost); the **implementation cost of the
+  extraction unitary**; any **net benefit combining switching work and extraction work** (the ledgers
+  are deliberately kept separate and are never summed); **repeated extraction or cycle operation**;
+  **long-time recovery or re-entry** (the formal window ends at t=8.50 and does not test the t=9.68
+  positive current return); **parameter generalization** to other coupling values, sweeps, N, gamma,
+  Omega, branch times, or t>8.50; **optimal control** of any kind (no optimum was searched for or
+  found, and weaker coupling is not shown to be generally better); any **experimental advantage** on
+  real hardware; and any **quantum advantage**.
 - Fair baselines against classical wave/stochastic models; novelty/priority vs the literature (no
   literature review done).
 
@@ -514,6 +826,13 @@ M10c 104, M10 Final 107; M11c 110, M11d 113, M11e 116, M11f and M11h-M11k 119, e
 ignored`). The 9c-validation runtime checks are 47/47 PASS and the robust eigenvalue diagnostic's
 required checks are 10/10 PASS. 11j and 11k additionally verify their inputs by SHA-256 before and
 after analysis.
+
+Later stages report their own runtimes and audits: the M14A design checks needed no time evolution
+(3.455 s after build, 11/11 PASS); M14 Plan B propagated a single 3080-step baseline prefix to t=7.70 in
+2177.4 s (36.29 min; construction 5.2 s, prefix 2169.8 s, two-state diagnostics/write 2.4 s) with
+22/22 checks PASS and 15/15 hashes unchanged; M15A reports 40/40 numerical and provenance checks PASS.
+The two saved 384x384 states from Plan B are stored as row-major little-endian complex-f64 binaries
+with `QWNRHO1` metadata (2,359,320 bytes each), individually hashed in `m14_plan_b_state_files.csv`.
 
 ---
 
@@ -592,6 +911,29 @@ Minimal pointers for the load-bearing results (each report lists its own full CS
 - **Equal-input N=3..7 event comparison:** `MILESTONE_N3_7_EVENT_COMPARISON_REPORT.md` (provided as
   `FINAL_REPORT.md`); key CSVs `event_summary.csv`, `odd_even_temporal_comparison.csv`,
   `numerical_checks.csv`.
+- **Post-peak ergotropy decomposition (12A):**
+  `MILESTONE_12A_LOCAL_ERGOTROPY_DECOMPOSITION_REPORT.md` (fixed-condition trajectory and
+  decomposition/quality CSVs listed therein).
+- **Temporal relation (12B):** `MILESTONE_12B_TEMPORAL_RELATION_REPORT.md` and `M12B_PRECOMMIT.md`
+  (event, interval-change, and normalized-comparison CSVs listed therein).
+- **Load-chain correlation (12C):** `MILESTONE_12C_LOAD_CHAIN_CORRELATION_REPORT.md`; key CSV
+  `m12c_interval_changes.csv`.
+- **Counterfactual branch experiment (13A):**
+  `MILESTONE_13A_FORMAL_SHORT_HORIZON_COUNTERFACTUAL_BRANCH_REPORT.md`; key CSV
+  `m13a_formal_branch_timeseries.csv` (728 formal rows).
+- **Branch temporal response (13B):** `MILESTONE_13B_WEAKER_COUPLING_TEMPORAL_RESPONSE_REPORT.md` and
+  `M13B_PRECOMMIT.md`; key CSVs `m13b_input_audit.csv`, `m13b_maximum_differences.csv`,
+  `m13b_interval_summary.csv`, `m13b_current_event_comparison.csv`, `m13b_energy_decomposition.csv`,
+  `m13b_normalized_delta_timeseries.csv`, `m13b_start_time_comparison.csv`.
+- **Coupling-control design (14A, design only):**
+  `MILESTONE_14A_COUPLING_CONTROL_AND_SWITCHING_WORK_DESIGN.md` (no formal control trajectory; the
+  11-row no-propagation unit-check CSV is described therein).
+- **Switching-work accounting (14 Plan B):** `MILESTONE_14_PLAN_B_SWITCHING_ACCOUNTING_REPORT.md`; key
+  CSVs `m14_plan_b_switching_work.csv`, `m14_plan_b_classification.csv`,
+  `m14_plan_b_scale_diagnostics.csv`, `m14_plan_b_state_files.csv`.
+- **End-point extraction accounting (15A):** `MILESTONE_15A_ENDPOINT_EXTRACTION_ACCOUNTING.md`; key
+  CSVs `endpoint_extraction_comparison.csv`, `gross_work.csv`, `energy_ledgers.csv`,
+  `numerical_checks.csv`.
 - **Post-11k mini-experiments** (paths TODO — confirm folder layout before linking):
   - Event order: `qwn_event_order_mini_REPORT.md` (CSV `event_orders.csv`).
   - Coherence vs W: `qwn_coherence_W_response_REPORT.md` (CSV `common_W_range.csv`).
@@ -600,7 +942,14 @@ Minimal pointers for the load-bearing results (each report lists its own full CS
 
 Reading conventions for the CSVs: `W_time_area`/`E_time_area` are time-areas of state quantities (not
 cumulative work or input); `W/Ein` is not an overall efficiency; `usable_fraction` is ergotropy over
-load energy; XGamma is a diagnostic, not a loss/efficiency.
+load energy; XGamma is a diagnostic, not a loss/efficiency. `W_coh`/`W_pop` are a descriptive
+energy-basis split of the load ergotropy, not independent conserved quantities; mutual information is a
+total-correlation observable in nats, not work, ergotropy, or entanglement; `W_coh` time-area is a
+time-integral of a state quantity, not cumulative extracted work. Switching work
+(`W_switch_on_system`/`W_switch_out`) is an ideal instantaneous Hamiltonian-jump ledger, not an actuator
+or controller cost; `W_load_gross` and `W_operation_out_total` are single-shot ideal-extraction ledgers.
+The state, switching, and extraction ledgers are reported separately and are never added or subtracted
+into a net benefit.
 
 ---
 
@@ -619,6 +968,17 @@ provided materials and are left open rather than guessed:
 - **Two distinct N=7 W_max values are not a contradiction.** `3.8081e-3` (M9c fixed-total,
   `Omega=0.2`) and `3.3853e-3` (M11g equal-input, `Omega~0.18748`) belong to *different* trajectories
   and conditions; readers should not conflate them. Noted here to avoid misreading.
+- **M14/M15A binary names and repository paths.** The 14A, 14 Plan B, and 15A reports identify their
+  source and output paths on the author's working machine but do not state repository-relative binary
+  names, so no entries were added to the `bin/` map in *Repository layout* rather than guessing.
+- **The M14A unit-check CSV and the M15A `numerical_checks.csv` are distinct artifacts.** 14A records
+  11/11 no-propagation unit-check rows; M15A's `numerical_checks.csv` holds the 40/40 extraction-stage
+  checks. An earlier-milestone file of the same generic name exists for the N=3..7 event comparison; the
+  three should not be conflated when collecting CSVs.
+- **A numerically zero switching work is not a cost statement.** `W_switch_on_system` values of order
+  `1e-15`/`1e-16` are below the 1e-12 audit tolerance for the *modeled Hamiltonian jump only*. No
+  actuator, ramp, bandwidth, or device-cost model exists in the project, so no controller-cost
+  conclusion can be drawn from them.
 
 ---
 
