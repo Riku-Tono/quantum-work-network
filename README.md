@@ -858,8 +858,15 @@ withdraw the B3 result above.
 
 ## Reproduction and verification
 
-Requires a Rust toolchain (`Cargo.toml`: edition 2021; deps `nalgebra`, `num-complex`, `thiserror`;
-dev-dep `approx`).
+Complete reproduction packages are stored as Milestone-specific ZIP archives in the repository's
+`zip/` directory. Source code, reports, CSV outputs, audit files, and any saved states required by a
+given stage are contained in the corresponding archive; they are not all exposed as individual files
+at the GitHub repository root.
+
+Download and extract the relevant archive, then run the commands below from the extracted directory
+that contains its `Cargo.toml`. A Rust toolchain is required (`Cargo.toml`: edition 2021; deps
+`nalgebra`, `num-complex`, `thiserror`; dev-dep `approx`). Archive contents vary by Milestone, so a
+binary or data file listed below may be present only in the package for that stage.
 
 ```bash
 cargo fmt --all -- --check
@@ -902,7 +909,25 @@ eigensolver fallback count 0; it saves two unextracted C2 states (`c2_pre_extrac
 
 ---
 
-## Repository layout
+## Repository and archive layout
+
+The public GitHub repository is organized as a small entry point plus Milestone-specific reproduction
+archives:
+
+```
+README.md                 # integrated project overview
+LICENSE                   # MIT license
+reports/                  # optional browser-readable report copies, where provided
+zip/                      # Milestone-specific complete reproduction packages
+  *.zip
+```
+
+The `reports/` directory is a convenience for reading selected reports in the browser. The
+reproduction packages in `zip/` are the self-contained records used for downloading and reproducing a
+stage. A report may therefore appear both as a browser-readable copy and inside its corresponding ZIP.
+
+After extracting the relevant ZIP, a typical Rust reproduction package has the following internal
+layout. Not every archive contains every later-stage file or binary:
 
 ```
 src/
@@ -942,15 +967,19 @@ MILESTONE_*.md                      # per-stage reports
 *.csv                               # per-stage outputs
 ```
 
-The `src/lib.rs` module declarations are based on the actual files; the `bin/` mapping and the Milestone
-10-11 binaries are organized from the "generated files" sections of the respective reports. For a
-complete list of individual CSVs, see the end of each MILESTONE report.
+This tree describes archive contents, not the GitHub repository root. The `src/lib.rs` module
+declarations are based on the actual files; the `bin/` mapping and the Milestone 10-11 binaries are
+organized from the "generated files" sections of the respective reports. For a complete list of
+individual CSVs, see the end of each MILESTONE report in the relevant ZIP.
 
 ---
 
 ## Detailed reports and data
 
-Minimal pointers for the load-bearing results (each report lists its own full CSV set):
+The filenames below refer to files inside the relevant Milestone reproduction ZIP. Some reports may
+also be mirrored under `reports/` for browser reading. Each report lists its own full CSV set.
+
+Minimal pointers for the load-bearing results:
 
 - **Foundations & central comparison:** `MILESTONE_4_RESULT.md`, `MILESTONE_5A/5B/5C`,
   `MILESTONE_6A_REPORT.md`; `Milestone_4-6a_研究結果ノート.pdf` summarizes 4-6a.
