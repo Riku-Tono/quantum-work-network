@@ -1,14 +1,14 @@
 # Quantum Work Network
 
-A Rust reference implementation for numerically computing how much of the energy driven through a
-small quantum network arrives at a receiver (the *load*) as **extractable work (ergotropy)**, and how
-that changes under phase noise. The project is developed as a single, incremental research and
-implementation history from Milestone 1 through Milestone 15A, via finite-chain (N=3..7)
-event-structure diagnostics, a descriptive decomposition of the load's coherent ergotropy (M12), a
-short-horizon counterfactual branch experiment (M13), coupling-control switching-work accounting (M14),
-and a single end-point ideal local extraction (M15A). After M15A, a supplementary comparison extended
-the C2 protocol to t=10 and compared it against a long-window C0 baseline on the common saved grid; it
-is not assigned a new Milestone number.
+Numerical experiments in Rust and Python on how much energy reaches the load of a finite quantum
+network as **extractable work (ergotropy)**. Milestones 1–15A cover the Lindblad model, chain-length
+and dephasing comparisons, coupling control, and a first ideal local extraction. A supplementary
+comparison followed C2 to t=10. Milestones 15B–23 compare extraction times and coupling strengths,
+then carry saved full-system states through decoupled storage, reconnection, and repeated extraction
+with the drive off.
+
+[Milestones 15B–23 results](#milestones-15b23-extraction-storage-and-recovery) ·
+[Reproduction ZIP for M15B–M23](zip/quantum_work_network_m15b-m23_reproducible.zip)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21435208.svg)](https://doi.org/10.5281/zenodo.21435208)
 ---
@@ -22,17 +22,17 @@ Lindblad master equation. The recurring question across all milestones is narrow
 *same situation*, how does the locally extractable work at the load change when phase noise
 (dephasing) is present — measured directly, within a finite-size, finite-time scope.
 
-Each milestone builds on the previous one without modifying earlier code, CSVs, or reports. Later
-stages generalize the chain length (N=3 -> 5 -> 7), separate two noise conventions (fixed-per-site vs
-fixed-total), and finally compare N=3 and N=7 at **equal drive input energy** and analyze the shape of
-the resulting work curves.
+Each milestone builds on earlier artifacts. The chain-length studies extend N=3 to N=5 and N=7,
+compare fixed-per-site and fixed-total dephasing, and match N=3 and N=7 at **equal drive input
+energy**. The extraction and recovery studies follow the N=7 line and record the state carried
+from one operation to the next.
 
 ---
 
 ## Scope and limitations
 
 What this repository provides are "values directly observed for this physical model, these initial
-conditions, this finite time, and this Rust implementation." In particular, this project **does not**:
+conditions, this finite time, and these implementations." In particular, this project **does not**:
 
 - prove any quantum advantage or that quantum beats a classical method;
 - establish universal scaling laws, exponential/power-law decay, thermodynamic limits, or N->infinity
@@ -624,14 +624,33 @@ SHA audit PASS. The C0 short/long observable residual is 0, the C2 t=7.70..8.50 
 0, and the M15A t=8.50 values reproduce to a maximum residual of `9.107e-18`. Eigensolver fallback count
 0; formal runtime 682.479 s.
 
-Scope: this is a finite-condition, saved-grid comparison from one propagation of one stored state
-against one fixed baseline. **No extraction was performed in this extension** — the only formal
-extraction in the project remains the single ideal local extraction at t=8.50 in M15A. It does not
-establish general weak-coupling or C2 superiority, an optimal coupling, switch time, or extraction time,
-any causal mechanism, any conversion of passive energy into ergotropy, any net benefit combining
-switching and extraction work, repeated or cyclic operation, steady-state output, behavior beyond t=10,
-other N/gamma/Omega/g, efficiency improvement, or quantum advantage. Where the word *advantage* is used
-here, it means only the sign of the bare-load ergotropy difference under these fixed finite conditions.
+This supplementary comparison reports bare-load ergotropy on the saved grid for one initial state
+and one fixed baseline. The single-extraction accounting at t=8.50 is in M15A. M15B evaluates
+extraction at additional saved times.
+
+### Milestones 15B–23: extraction, storage, and recovery
+
+The extraction experiments apply an ideal local unitary to the three-level load. From M18 onward,
+the drive stays off and the full system state, including the chain and its correlations with the
+load, is carried forward. Gross work is the drop in bare-load energy. Total extraction work is
+the drop in full-system energy across the unitary, including the interaction term. Net work
+subtracts the signed input work of the applicable coupling switches from total extraction work.
+Cumulative work adds the net work of operations actually applied along the trajectory.
+
+| Milestone | Comparison and observed result |
+|---|---|
+| **15B · Extraction time** | Among t=8.50, 9.00, 9.50, and 10.00, both C0 and C2 gave their largest single extraction at t=8.50 (3.062677e-3 and 3.250946e-3). At t=10, C2 yielded 27.77% more than C0 at the same time. |
+| **16 · Coupling strength** | From the common t=7.70 state, t=10 bare-load ergotropy retention was 68.72%, 76.94%, 87.81%, and 96.16% at g=0.25, 0.20, 0.125, and 0.05. The ordering held at all 230 post-switch saved times. |
+| **17 · Decoupled storage** | At t=10, g=0.01 retained 99.353% of the initial load ergotropy. Complete decoupling retained it within a maximum drift of 2.39e-17, with zero chain-to-load current. Four full-system states were saved before and after extraction for g=0.01 and g=0. |
+| **18 · Second extraction** | Four reconnected branches reformed detectable load ergotropy after the M17 extraction. The strongest tested coupling, g=0.25, yielded 8.512634e-5 of second-extraction net work at t=15.90. The disconnected control stayed within numerical tolerance of zero. |
+| **19 · Repeated extraction** | Starting from the M18 post-extraction state, all eight operations in rounds 3–10 passed the acceptance checks and added 9.611534e-6 of net work. Including the second extraction raised the cumulative work by 2.80% relative to the first extraction alone. |
+| **20 · Fixed wait** | Waiting 2.00 before each g=0.25 reconnection yielded 9.333843e-6 over eight rounds, 2.89% below M19. Cumulative net work per unit of elapsed model time was 35.53% lower. |
+| **21 · Dephasing sweep** | With 2.00 waits and independent extraction times, zero dephasing yielded 5.43× the eight-round net work of total dephasing rate 1.50. With extraction times held to the rate-1.50 schedule, the corresponding ratio was 2.29×. |
+| **22 · Continuous connection** | At zero dephasing, continuous connection gave 7.01% more net work than fixed-wait reconnection after eight extractions and 11.22% less at the common elapsed time of 77.48. The ranking at eight extractions also depended on the dephasing rate. |
+| **23 · Variable wait and phase** | At zero dephasing, the best sampled waits for the three starting states were 4.900, 4.625, and 0.000. Varying the wait reversed the initial reconnection current in two of the three states. The wait maximizing initial reconnection current differed from the wait maximizing net extraction in all three. From S0, variable waits yielded 4.79485e-5 over eight rounds in 60.34 model-time units, up 3.08% over continuous connection and 10.30% over fixed waits. The prediction rules fell short of the preregistered held-out thresholds. |
+
+These comparisons use finite time windows and discrete timing grids. A protocol that recovers more
+work after the same number of operations can recover less work by the same elapsed time.
 
 ---
 
@@ -809,8 +828,9 @@ withdraw the B3 result above.
 - Any physical mechanism behind the observed shapes — group velocity, boundary reflection, mode
   beating, entanglement/correlation fronts, or any causal relationship — and that transform/decay fits
   correspond to specific physical processes.
-- Control cost of extraction, finite-time switch-off/extraction, repeated cycles, continuous supply,
-  steady output, long-time stability.
+- Implementation cost of extraction and switching, finite-duration operations, continuous supply,
+  steady output, and long-time stability. The modeled repeated sequences in M19–M23 draw work from
+  the prepared full-system state over finite intervals.
 - `dt`-halving convergence *beyond the single matched N=7 trajectory checked in 11L* (arbitrary dt, other
   matched conditions, a fine-dt-specific matching root); matching-root uniqueness/monotonicity.
 - Equal-input results for `TOTAL_GAMMA=3.0`, for other `Omega` roots, for N>7, or for t>10; N=8 is not
@@ -838,19 +858,9 @@ withdraw the B3 result above.
   start times, the finite window (branch t<=8.50, trajectory t<=10), and this saved resolution; within
   M12/M13 themselves no extraction, recovery, control, or repeated-cycle operation was performed (the
   later C2 extension to t=10 is a separate supplementary check and likewise performed no extraction).
-- Anything beyond the ideal, instantaneous idealizations used in M14/M15A. Specifically not confirmed:
-  a **finite-time switch or ramp** (the modeled quench has mathematically zero duration, no controller
-  Hamiltonian and no bandwidth limit); the **implementation cost of any actuator or controller** (a
-  numerically zero Hamiltonian-jump work is not a zero device cost); the **implementation cost of the
-  extraction unitary**; any **net benefit combining switching work and extraction work** (the ledgers
-  are deliberately kept separate and are never summed); **repeated extraction or cycle operation**;
-  **general long-time stability, steady state, or behavior beyond t=10** — note that the formal windows
-  and the single extraction time of M13A and M15A themselves remain t=8.50, while a separate
-  supplementary check has propagated C2 to t=10, so saved-grid comparisons at t=9.68 and t=10 have been
-  carried out (without extraction); **parameter generalization** to other coupling values, sweeps, N,
-  gamma, Omega, branch times, or conditions beyond those fixed here; **optimal control** of any kind (no
-  optimum was searched for or found, and weaker coupling is not shown to be generally better); any
-  **experimental advantage** on real hardware; and any **quantum advantage**.
+- Control performance outside the sampled couplings, waits, extraction times, and initial states.
+  The reported maxima are grid maxima for the tested model. Switching work uses instantaneous
+  Hamiltonian jumps. Extraction work uses ideal local unitaries.
 - Fair baselines against classical wave/stochastic models; novelty/priority vs the literature (no
   literature review done).
 
@@ -858,12 +868,13 @@ withdraw the B3 result above.
 
 ## Reproduction and verification
 
-Complete reproduction packages are stored as Milestone-specific ZIP archives in the repository's
-`zip/` directory. Source code, reports, CSV outputs, audit files, and any saved states required by a
-given stage are contained in the corresponding archive; they are not all exposed as individual files
-at the GitHub repository root.
+Download the relevant package from the [archive directory](zip/). For the latest stages, start with
+the top-level `README.md` inside the [M15B–M23 reproduction ZIP](zip/quantum_work_network_m15b-m23_reproducible.zip).
+It includes source, saved starting states, reference results, and instructions for regenerating and
+checking the calculations on Windows. The large generated candidate grids and output states
+for the later stages are produced by those calculations.
 
-Download and extract the relevant archive, then run the commands below from the extracted directory
+For the earlier Rust packages, run the commands below from the extracted directory
 that contains its `Cargo.toml`. A Rust toolchain is required (`Cargo.toml`: edition 2021; deps
 `nalgebra`, `num-complex`, `thiserror`; dev-dep `approx`). Archive contents vary by Milestone, so a
 binary or data file listed below may be present only in the package for that stage.
@@ -1034,7 +1045,13 @@ Minimal pointers for the load-bearing results:
   `c0_c2_extended_summary.csv`, `c0_c2_extended_comparison_timeseries.csv`,
   `c0_c2_extended_time_area_summary.csv`, `c0_c2_extended_difference_events.csv`,
   `c2_extension_numerical_checks.csv`, `c2_extension_input_manifest.csv`.
-
+- **Extraction timing, coupling, and storage (15B–17):** `m15b_timing_comparison.csv`,
+  `coupling_comparison.csv`, and `MILESTONE_17_DECOUPLING_STORAGE_REPORT.md`.
+- **Reconnection and repeated recovery (18–20):** `MILESTONE_18_RECONNECTION_RECOVERY_REPORT.md`,
+  `MILESTONE_19_REPEAT_RECOVERY_REPORT.md`, and `MILESTONE_20_FIXED_WAIT_RECOVERY_REPORT.md`.
+- **Dephasing, continuous connection, and variable waits (21–23):**
+  `MILESTONE_21_DEPHASING_REPORT.md`, `MILESTONE_22_CONTINUOUS_CONNECTION_REPORT.md`, and
+  `MILESTONE_23_PHASE_CONTROL_REPORT.md`.
 
 Reading conventions for the CSVs: `W_time_area`/`E_time_area` are time-areas of state quantities (not
 cumulative work or input); `W/Ein` is not an overall efficiency; `usable_fraction` is ergotropy over
@@ -1042,10 +1059,9 @@ load energy; XGamma is a diagnostic, not a loss/efficiency. `W_coh`/`W_pop` are 
 energy-basis split of the load ergotropy, not independent conserved quantities; mutual information is a
 total-correlation observable in nats, not work, ergotropy, or entanglement; `W_coh` time-area is a
 time-integral of a state quantity, not cumulative extracted work. Switching work
-(`W_switch_on_system`/`W_switch_out`) is an ideal instantaneous Hamiltonian-jump ledger, not an actuator
-or controller cost; `W_load_gross` and `W_operation_out_total` are single-shot ideal-extraction ledgers.
-The state, switching, and extraction ledgers are reported separately and are never added or subtracted
-into a net benefit.
+(`W_switch_on_system`/`W_switch_out`) records the ideal instantaneous Hamiltonian jump.
+`W_load_gross` and `W_operation_out_total` record ideal single-shot extraction. M18–M23
+use the signed switch input and total extraction output to compute modeled net work.
 
 ---
 
