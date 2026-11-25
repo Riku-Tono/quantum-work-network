@@ -5,7 +5,11 @@ network as **extractable work (ergotropy)**. Milestones 1–15A cover the Lindbl
 and dephasing comparisons, coupling control, and a first ideal local extraction. A supplementary
 comparison followed C2 to t=10. Milestones 15B–23 compare extraction times and coupling strengths,
 then carry saved full-system states through decoupled storage, reconnection, and repeated extraction
-with the drive off.
+with the drive off. Milestones 24–30 develop predictive stopping and adaptive reconnection, then test
+how reconnection conditions affect net work.
+
+[Milestones 24–30 results](#milestones-2430-predictive-stopping-and-adaptive-reconnection) ·
+[Reproduction ZIP for M24–M30](zip/quantum_work_network_m24-m30_reproducible.zip)
 
 [Milestones 15B–23 results](#milestones-15b23-extraction-storage-and-recovery) ·
 [Reproduction ZIP for M15B–M23](zip/quantum_work_network_m15b-m23_reproducible.zip)
@@ -18,9 +22,9 @@ with the drive off.
 The physical system is a chain of two-level sites (qubits) with one 3-level load attached at one end.
 One end site is driven by an external pulse to inject energy; the propagation of that energy along the
 chain and its accumulation in the load are tracked as the time evolution of a density matrix under a
-Lindblad master equation. The recurring question across all milestones is narrow and concrete: for the
-*same situation*, how does the locally extractable work at the load change when phase noise
-(dephasing) is present — measured directly, within a finite-size, finite-time scope.
+Lindblad master equation. The dephasing studies measure how phase noise changes the locally
+extractable work at the load under the comparison conditions for each stage. The drive-off studies
+compare how extraction timing and reconnection change net work over finite intervals.
 
 Each milestone builds on earlier artifacts. The chain-length studies extend N=3 to N=5 and N=7,
 compare fixed-per-site and fixed-total dephasing, and match N=3 and N=7 at **equal drive input
@@ -652,6 +656,26 @@ Cumulative work adds the net work of operations actually applied along the traje
 These comparisons use finite time windows and discrete timing grids. A protocol that recovers more
 work after the same number of operations can recover less work by the same elapsed time.
 
+### Milestones 24–30: predictive stopping and adaptive reconnection
+
+These studies continue with the drive off in a seven-site chain with a three-level load and zero
+dephasing. Online controls use observations available at the time of each decision. For M30, the
+work ledger at each common time includes every coupling operation already executed.
+
+| Milestone | Comparison and observed result |
+|---|---|
+| **24 · Predictive extraction timing** | Subtracting the rate of change of passive energy from the load current gave a forecast near the window maximum on all 33 trajectories. Committing to the first forecast placed 15 extraction times within 0.10 model-time units of the window maximum. |
+| **25 · Repeated predictive stopping** | After 30 extractions, predictive stopping had 2.03× the work rate and 57.5% of the cumulative work of the variable-wait reference. It led at elapsed time 50 in all four starts. The variable-wait reference led at 150. |
+| **26 · Long horizon without a count cap** | Removing the 30-extraction cap preserved the reversal by elapsed time 150 in all four starts. At 540 the variable-wait reference averaged about 1.64× the cumulative work of predictive stopping. |
+| **27 · Adaptive switching to variable waits** | Online switching to a waiting mode retained the early performance of predictive stopping and exceeded its endpoint work in all four starts. The mean endpoint work reached about 86–87% of the per-trial retrospective reference. |
+| **28 · Numerical robustness and phase information** | A positive-rate floor stabilized the switching decision near zero after load passivation. Removing the phase-angle condition alone left the tested four-start trajectories unchanged when the other reconnection conditions were retained. |
+| **29 · Minimal-information control** | The imaginary-component-only P3 rule roughly halved the number of real scalar acquisitions for reconnection and met the work-retention criteria in both existing anchor groups. Among six newly prepared states, U05 yielded negative net work with the simplified variants and positive net work with the full rule RP. |
+| **30 · Reconnection conditions and their interaction** | On the common sixth U05 trial, restoring either the input condition or the phase-angle condition blocked the early lossy reconnection. Over the full trajectory, restoring both to P3 yielded 140.53% of RP’s U05 endpoint work. Exact unitary propagation with online decisions reproduced that ratio. |
+
+At elapsed time 540, P3 with both conditions restored was the only alternative to RP to meet the
+preregistered thresholds of 95% mean retention and 90% per-state retention in all three groups.
+The six prepared states from M29 were reused in M30.
+
 ---
 
 ## Current main results
@@ -829,10 +853,12 @@ withdraw the B3 result above.
   beating, entanglement/correlation fronts, or any causal relationship — and that transform/decay fits
   correspond to specific physical processes.
 - Implementation cost of extraction and switching, finite-duration operations, continuous supply,
-  steady output, and long-time stability. The modeled repeated sequences in M19–M23 draw work from
-  the prepared full-system state over finite intervals.
-- `dt`-halving convergence *beyond the single matched N=7 trajectory checked in 11L* (arbitrary dt, other
-  matched conditions, a fine-dt-specific matching root); matching-root uniqueness/monotonicity.
+  steady output, and long-time stability. The modeled repeated sequences in M19–M30 draw work from
+  the prepared full-system state over finite intervals. The M24–M30 controls use ideal operations and
+  simulated observations without measurement noise or back-action.
+- For the equal-input study, `dt`-halving convergence beyond the single matched N=7 trajectory checked
+  in 11L, including arbitrary dt, other matched conditions, and a fine-dt-specific matching root.
+  Matching-root uniqueness and monotonicity also remain open.
 - Equal-input results for `TOTAL_GAMMA=3.0`, for other `Omega` roots, for N>7, or for t>10; N=8 is not
   included in the formal chain-length comparison; other external solver crates (out of 9c-validation
   scope). (Equal-input N=4/5/6 now exist only as finite-chain event-structure diagnostics, not as a
@@ -868,11 +894,16 @@ withdraw the B3 result above.
 
 ## Reproduction and verification
 
-Download the relevant package from the [archive directory](zip/). For the latest stages, start with
-the top-level `README.md` inside the [M15B–M23 reproduction ZIP](zip/quantum_work_network_m15b-m23_reproducible.zip).
-It includes source, saved starting states, reference results, and instructions for regenerating and
-checking the calculations on Windows. The large generated candidate grids and output states
-for the later stages are produced by those calculations.
+Download the relevant package from the [archive directory](zip/). For M24–M30, start with the
+top-level `README.md` inside the [M24–M30 reproduction ZIP](zip/quantum_work_network_m24-m30_reproducible.zip).
+It includes the necessary upstream code and a frozen subset of M23 inputs, alongside the M24–M30
+code, reports, and selected reference results. The instructions explain how to regenerate omitted
+outputs on Windows. The optional legacy check of the complete M23 archive hash uses the original
+M23 ZIP.
+
+For M15B–M23, the [earlier reproduction ZIP](zip/quantum_work_network_m15b-m23_reproducible.zip)
+includes source, saved starting states, reference results, and Windows reproduction instructions.
+Its calculations regenerate the large candidate grids and output states.
 
 For the earlier Rust packages, run the commands below from the extracted directory
 that contains its `Cargo.toml`. A Rust toolchain is required (`Cargo.toml`: edition 2021; deps
@@ -1052,6 +1083,16 @@ Minimal pointers for the load-bearing results:
 - **Dephasing, continuous connection, and variable waits (21–23):**
   `MILESTONE_21_DEPHASING_REPORT.md`, `MILESTONE_22_CONTINUOUS_CONNECTION_REPORT.md`, and
   `MILESTONE_23_PHASE_CONTROL_REPORT.md`.
+- **Predictive timing and repeated recovery (24–26):** `MILESTONE_24_ERGOTROPY_TIMING_REPORT.md`,
+  `MILESTONE_25_REPEATED_ERGOTROPY_CONTROL_REPORT.md`, and
+  `MILESTONE_26_UNCAPPED_LONG_HORIZON_REPORT.md`.
+- **Adaptive switching, phase information, and simpler controls (27–29):**
+  `MILESTONE_27_ADAPTIVE_WORK_EXTRACTION_REPORT.md`,
+  `MILESTONE_28_NUMERICAL_ROBUSTNESS_AND_PHASE_REPORT.md`, and
+  `MILESTONE_29_MINIMAL_INFORMATION_AND_GENERALIZATION_REPORT.md`.
+- **Reconnection-condition interactions (30):** `MILESTONE_30_RECONNECTION_CONDITIONS_REPORT.md`.
+  Key tables include `m30_endpoints.csv`, `m30_work_events.csv`, `m30_factorial.csv`, and
+  `m30_numerical_comparison.csv`. The report links to the protocol, figures, and audit results.
 
 Reading conventions for the CSVs: `W_time_area`/`E_time_area` are time-areas of state quantities (not
 cumulative work or input); `W/Ein` is not an overall efficiency; `usable_fraction` is ergotropy over
@@ -1060,7 +1101,7 @@ energy-basis split of the load ergotropy, not independent conserved quantities; 
 total-correlation observable in nats, not work, ergotropy, or entanglement; `W_coh` time-area is a
 time-integral of a state quantity, not cumulative extracted work. Switching work
 (`W_switch_on_system`/`W_switch_out`) records the ideal instantaneous Hamiltonian jump.
-`W_load_gross` and `W_operation_out_total` record ideal single-shot extraction. M18–M23
+`W_load_gross` and `W_operation_out_total` record ideal single-shot extraction. M18–M30
 use the signed switch input and total extraction output to compute modeled net work.
 
 ---
