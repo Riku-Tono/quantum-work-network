@@ -6,7 +6,11 @@ and dephasing comparisons, coupling control, and a first ideal local extraction.
 comparison followed C2 to t=10. Milestones 15B–23 compare extraction times and coupling strengths,
 then carry saved full-system states through decoupled storage, reconnection, and repeated extraction
 with the drive off. Milestones 24–30 develop predictive stopping and adaptive reconnection, then test
-how reconnection conditions affect net work.
+how reconnection conditions affect net work. Milestone 31 tests the M30 rule on eight new
+initial states.
+
+[Milestone 31 results](#milestone-31-held-out-initial-states) ·
+[Reproduction ZIP for M31](zip/quantum_work_network_m31_reproducible.zip)
 
 [Milestones 24–30 results](#milestones-2430-predictive-stopping-and-adaptive-reconnection) ·
 [Reproduction ZIP for M24–M30](zip/quantum_work_network_m24-m30_reproducible.zip)
@@ -676,6 +680,28 @@ At elapsed time 540, P3 with both conditions restored was the only alternative t
 preregistered thresholds of 95% mean retention and 90% per-state retention in all three groups.
 The six prepared states from M29 were reused in M30.
 
+### Milestone 31: held-out initial states
+
+M31 evaluated the unchanged P3+IA reconnection rule against RP in the same seven-site chain and
+three-level load model. The eight new preparations included four fixed continuations of earlier
+starting states and four directly constructed mixed product states. Recipes, controller code, and
+acceptance criteria were fixed before evaluation. Both policies started from the same density at
+elapsed zero for each comparison, and net work included all switching and passivation already
+executed at the evaluation time.
+
+| Elapsed 540 result | P3+IA versus RP |
+|---|---|
+| Ratio of mean net work across all eight states | **101.75%**, above the 95% criterion |
+| Lowest ratio among the six states with RP work above the comparison floor | **91.28%** on V01, above the 90% criterion |
+| Two states evaluated by absolute shortfall | Both passed. V04 changed from `−2.74303e-4` with RP to `+1.64908e-4` with P3+IA. |
+| Reconnection readout on coarse RK4 runs | Both used two real components per observation. Magnitude evaluations fell from 8,524 to zero, and total real-component acquisitions fell by 0.15%. |
+
+Coarse RK4, half-step RK4, and exact unitary propagation with online decisions agreed on the
+control chronology and performance judgment. Independent replay checked all 48 trajectories and
+144 saved boundaries. The results apply to this specified set of preparations at elapsed 540.
+The [M31 reproduction ZIP](zip/quantum_work_network_m31_reproducible.zip) contains the fixed
+protocol, full report, comparison tables, and independent audit.
+
 ---
 
 ## Current main results
@@ -853,8 +879,8 @@ withdraw the B3 result above.
   beating, entanglement/correlation fronts, or any causal relationship — and that transform/decay fits
   correspond to specific physical processes.
 - Implementation cost of extraction and switching, finite-duration operations, continuous supply,
-  steady output, and long-time stability. The modeled repeated sequences in M19–M30 draw work from
-  the prepared full-system state over finite intervals. The M24–M30 controls use ideal operations and
+  steady output, and long-time stability. The modeled repeated sequences in M19–M31 draw work from
+  the prepared full-system state over finite intervals. The M24–M31 controls use ideal operations and
   simulated observations without measurement noise or back-action.
 - For the equal-input study, `dt`-halving convergence beyond the single matched N=7 trajectory checked
   in 11L, including arbitrary dt, other matched conditions, and a fine-dt-specific matching root.
@@ -894,8 +920,12 @@ withdraw the B3 result above.
 
 ## Reproduction and verification
 
-Download the relevant package from the [archive directory](zip/). For M24–M30, start with the
-top-level `README.md` inside the [M24–M30 reproduction ZIP](zip/quantum_work_network_m24-m30_reproducible.zip).
+Download the relevant package from the [archive directory](zip/). For M31, the top-level
+`README.md` inside the [M31 reproduction ZIP](zip/quantum_work_network_m31_reproducible.zip)
+explains how to recreate the eight initial states, run both policies, and verify the outputs.
+The package includes the controller and upstream input subset needed for M31.
+
+For M24–M30, start with the top-level `README.md` inside the [M24–M30 reproduction ZIP](zip/quantum_work_network_m24-m30_reproducible.zip).
 It includes the necessary upstream code and a frozen subset of M23 inputs, alongside the M24–M30
 code, reports, and selected reference results. The instructions explain how to regenerate omitted
 outputs on Windows. The optional legacy check of the complete M23 archive hash uses the original
@@ -1093,6 +1123,10 @@ Minimal pointers for the load-bearing results:
 - **Reconnection-condition interactions (30):** `MILESTONE_30_RECONNECTION_CONDITIONS_REPORT.md`.
   Key tables include `m30_endpoints.csv`, `m30_work_events.csv`, `m30_factorial.csv`, and
   `m30_numerical_comparison.csv`. The report links to the protocol, figures, and audit results.
+- **Held-out initial-state validation (31):** `MILESTONE_31_HELDOUT_CONTROL_VALIDATION_REPORT.md`.
+  Key tables include `m31_paired_endpoints.csv`, `m31_group_metrics.csv`, and
+  `m31_numerical_comparison.csv`. The package includes the initial-state registration and
+  `audit_independent.json`.
 
 Reading conventions for the CSVs: `W_time_area`/`E_time_area` are time-areas of state quantities (not
 cumulative work or input); `W/Ein` is not an overall efficiency; `usable_fraction` is ergotropy over
@@ -1101,7 +1135,7 @@ energy-basis split of the load ergotropy, not independent conserved quantities; 
 total-correlation observable in nats, not work, ergotropy, or entanglement; `W_coh` time-area is a
 time-integral of a state quantity, not cumulative extracted work. Switching work
 (`W_switch_on_system`/`W_switch_out`) records the ideal instantaneous Hamiltonian jump.
-`W_load_gross` and `W_operation_out_total` record ideal single-shot extraction. M18–M30
+`W_load_gross` and `W_operation_out_total` record ideal single-shot extraction. M18–M31
 use the signed switch input and total extraction output to compute modeled net work.
 
 ---
